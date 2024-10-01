@@ -1,15 +1,19 @@
 import React from "react";
 
-function NewTaskForm({ handleChange, label }) {
+function NewTaskForm({ handleSubmit, handleChange, handleSecChange, handleMinChange, label, min, sec }) {
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleSubmit(event);
+    }
+  };
+
   return (
-    <input
-      className="new-todo"
-      type="text"
-      placeholder="What needs to be down?"
-      onChange={handleChange}
-      value={label}
-      autoFocus
-    />
+    <form className="new-todo-form" type="submit" onSubmit={handleSubmit} onKeyDown={handleKeyPress}>
+      <input className="new-todo" onChange={handleChange} type="text" value={label} placeholder="Task" autoFocus />
+      <input className="new-todo-form__timer" onChange={handleMinChange} type="text" value={min} placeholder="Min" />
+      <input className="new-todo-form__timer" onChange={handleSecChange} type="text" value={sec} placeholder="Sec" />
+    </form>
   );
 }
 
