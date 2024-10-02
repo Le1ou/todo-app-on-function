@@ -59,18 +59,20 @@ function App() {
 
   const onCheckData = () => {
     const isValidNumber = (value) => value === "" || /^[0-9]+$/.test(value);
-    if (!isValidNumber(min) && !isValidNumber(sec)) {
+    const trimmedMin = min.trim();
+    const trimmedSec = sec.trim();
+    if (!isValidNumber(trimmedMin) && !isValidNumber(trimmedSec)) {
       alert("Both values must be numbers.");
       return false;
-    } else if (!isValidNumber(min)) {
+    } else if (!isValidNumber(trimmedMin)) {
       alert("The value of min must be a number.");
       return false;
-    } else if (!isValidNumber(sec)) {
+    } else if (!isValidNumber(trimmedSec)) {
       alert("The value of sec must be a number.");
       return false;
     }
     return true;
-  }
+  };
 
   const onToogleCheck = (id) => {
     setTodoData((prevData) => prevData.map((el) => (el.id === id ? { ...el, check: !el.check } : el)));
