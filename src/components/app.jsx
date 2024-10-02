@@ -24,9 +24,13 @@ function App() {
       status: "all",
       edit: false,
       editText: label,
+      isPaused: true,
       timer: (hours * 3600 + min * 60 + sec) * 1000,
     };
   }
+
+  const handleTimer = (id) => {
+    setTodoData(prevData => prevData.map(el => el.id === id ? {...el, isPaused : !el.isPaused} : el))}
 
   useEffect(() => {
     setTodoFilter(todoData);
@@ -141,9 +145,11 @@ function App() {
             todos={todoFilter}
             onToogleCheck={onToogleCheck}
             editSubmit={editSubmit}
+            handleTimer={handleTimer}
+            setTodoData={setTodoData}
           />
         </ul>
-        <Footer completed={completed} clearData={clearData} filtered={filtered} status={status} />
+        <Footer completed={completed} clearData={clearData} filtered={filtered} status={status}/>
       </section>
     </section>
   );

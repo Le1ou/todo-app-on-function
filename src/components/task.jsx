@@ -1,36 +1,39 @@
 import React, { useState, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 
-function Task({ props, deleteTodo, onToogleCheck, editSubmit }) {
+function Task({ props, id, deleteTodo, onToogleCheck, editSubmit, handleTimer, setTodoData }) {
   const [edit, setEdit] = useState(false);
   const [editText, setEditText] = useState(props.label);
-  const [isPaused, setIsPaused] = useState(true);
-  const [timer, setTimer] = useState(props.timer);
-  const [intervalId, setIntervalId] = useState(null);
-
-  const handleTimer = () => {
-    setIsPaused(prevState => !prevState)
-  }
+  const [timer, setTimer] = useState(props.timer || 86400000);
 
   useEffect(() => {
-    if (!isPaused) {
-      const id = setInterval(() => {
+    let intervalId;
+    if (!props.isPaused) {
+      intervalId = setInterval(() => {
         setTimer(prevState => {
-            if(prevState <= 0) {
-              clearInterval(id)
-              setIsPaused(prevState => !prevState);
-              setTimer(86400000);
-              return props.check = true;
-            }
-          return prevState - 1000;
+          if (prevState > 0 ) return prevState - 1000;
+          return prevState;
         })
-      }, 1000)
-      setIntervalId(id);
-
-      return () => clearInterval(id)
+      }, 1000);
     }
-    else if (intervalId) clearInterval(intervalId)
-  }, [isPaused])
+    return () => clearInterval(intervalId);
+  }, [props.isPaused])
+
+  useEffect(() => {
+    console.log(`Timer for task ${id} updated to ${timer}`);
+    setTodoData((prevState) =>
+      prevState.map((el) => {
+        if (el.id === id) {
+          if (timer === 0) {
+            console.log(`Task ${id} completed`);
+            return { ...el, timer, check: true, isPaused: true };
+          }
+          return { ...el, timer };
+        }
+        return el;
+      })
+    );
+  }, [timer, setTodoData, props.id]);
 
   const onSubmit = (evt) => {
     evt.preventDefault();
@@ -38,11 +41,16 @@ function Task({ props, deleteTodo, onToogleCheck, editSubmit }) {
     setEdit(false);
   };
   
+  const handleToogleCheck = () => {
+    onToogleCheck()
+    if (props.check) {
+      setTimer(86400000)
+    }
+  }
   const formatTime = (time) => {
     if (time > 86400000) {
       setTimer(86400000);
     }
-
     const totalSeconds = Math.floor(time / 1000);
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -56,10 +64,10 @@ function Task({ props, deleteTodo, onToogleCheck, editSubmit }) {
   }
   const timeAgo = `created ${formatDistanceToNow(new Date(props.date), { addSuffix: true, includeSeconds: true })}`;
 
-  return (
+    return (
     <li className={className}>
       <div className="view">
-        <input className="toggle" type="checkbox" checked={props.check} onClick={onToogleCheck} readOnly />
+        <input className="toggle" type="checkbox" checked={props.check} onClick={handleToogleCheck} readOnly />
         <label>
         <span className="title">
               {props.label}
@@ -67,8 +75,8 @@ function Task({ props, deleteTodo, onToogleCheck, editSubmit }) {
 
       {!props.check &&
       <span className="description">
-              <button className="icon icon-play" onClick={handleTimer} hidden={!isPaused}></button>
-              <button className="icon icon-pause" onClick={() => setIsPaused(!isPaused)} hidden={isPaused}></button>
+              <button className="icon icon-play" onClick={handleTimer} hidden={!props.isPaused}></button>
+              <button className="icon icon-pause" onClick={handleTimer} hidden={props.isPaused}></button>
               {formatTime(timer)}
             </span>
       }
